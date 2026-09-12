@@ -10,3 +10,4 @@ config/flow.projects.json
 .DS_Store
 *.log
 test-agent-generation.js
+tmp/

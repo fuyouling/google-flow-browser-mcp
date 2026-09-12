@@ -36,7 +36,7 @@ export async function handleCreateScene(args) {
 
   const elements = await detectPageElements(page);
   const newSceneLocator = page.locator(
-    'button:has-text("New Scene"), button:has-text("Créer"), button:has-text("Nouvelle scène")'
+    'button:has-text("New Scene"), button:has-text("Créer"), button:has-text("Nouvelle scène"), button:has-text("新建场景"), button:has-text("创建")'
   ).first();
 
   if (await newSceneLocator.isVisible().catch(() => false)) {

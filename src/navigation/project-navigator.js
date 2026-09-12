@@ -31,7 +31,7 @@ function saveProjects(data) {
  * Returns array of { name, url, fullText }.
  */
 export async function listExistingProjects(page) {
-  const flowUrl = get('flowUrl', 'https://labs.google/fx/fr/tools/flow');
+  const flowUrl = get('flowUrl', 'https://labs.google/fx/zh/tools/flow');
 
   // Navigate to the main Flow page if we're not there, or if we're INSIDE a project
   const currentUrl = page.url();
@@ -79,7 +79,7 @@ export async function listExistingProjects(page) {
  * Returns { url, id, name }.
  */
 export async function createNewProject(page, name) {
-  const flowUrl = get('flowUrl', 'https://labs.google/fx/fr/tools/flow');
+  const flowUrl = get('flowUrl', 'https://labs.google/fx/zh/tools/flow');
 
   // Ensure we're on the main Flow page (not inside a project)
   const currentUrl = page.url();
@@ -90,8 +90,14 @@ export async function createNewProject(page, name) {
 
   logger.info('Creating new project...');
 
-  // Click "Nouveau projet"
+  // Click "Nouveau projet" / "新建项目" / "New project"
   const newBtnSelectors = [
+    'button:has-text("新建项目")',
+    'a:has-text("新建项目")',
+    'button:has-text("创建项目")',
+    'a:has-text("创建项目")',
+    '[aria-label*="新建项目"]',
+    '[aria-label*="创建项目"]',
     'button:has-text("Nouveau projet")',
     'a:has-text("Nouveau projet")',
     '[aria-label*="Nouveau projet"]',
@@ -149,6 +155,8 @@ export async function createNewProject(page, name) {
 
         // Confirm / submit
         const confirmSelectors = [
+          'button:has-text("创建")',
+          'button:has-text("确定")',
           'button:has-text("Créer")',
           'button:has-text("Confirmer")',
           'button:has-text("OK")',
@@ -438,13 +446,13 @@ export async function switchToImageMode(page) {
     }
   }
 
-  logger.info('Trying Vidéo dropdown fallback...');
-  const videoButton = page.locator('button:has-text("Vidéo")').first();
+  logger.info('Trying Video/Image dropdown fallback...');
+  const videoButton = page.locator('button:has-text("Vidéo"), button:has-text("Video"), button:has-text("视频")').first();
   if (await videoButton.isVisible().catch(() => false)) {
     await videoButton.click();
     await page.waitForTimeout(1500);
 
-    const imgOption = page.locator('[role="menuitem"]:has-text("Image"), [id*="trigger-IMAGE"]').first();
+    const imgOption = page.locator('[role="menuitem"]:has-text("Image"), [role="menuitem"]:has-text("图片"), [role="menuitem"]:has-text("图像"), [id*="trigger-IMAGE"]').first();
     if (await imgOption.isVisible().catch(() => false)) {
       await imgOption.click();
       await page.waitForTimeout(1500);

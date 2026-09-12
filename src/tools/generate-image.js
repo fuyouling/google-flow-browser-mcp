@@ -117,7 +117,7 @@ export async function handleGenerateImage(args) {
 
     // Also verify the generate button exists (confirms the toolbar is active)
     const hasGenerateBtn = await page.locator(
-      'button:has-text("arrow_forward"), button:has-text("Créer")'
+      'button:has-text("arrow_forward"), button:has-text("Créer"), button:has-text("Generate"), button:has-text("生成"), button:has-text("创建")'
     ).first().isVisible().catch(() => false);
     if (!hasGenerateBtn) {
       logger.warn('Generate button not visible on project page');
@@ -187,7 +187,7 @@ export async function handleGenerateImage(args) {
     // STEP 8: Find generate button
     const generateBtnLocator = page.locator(
       'button:has-text("arrow_forward"), ' +
-      'button:has-text("Generate")'
+      'button:has-text("Generate"), button:has-text("Créer"), button:has-text("生成"), button:has-text("创建")'
     ).first();
     const generateBtnVisible = await generateBtnLocator.isVisible().catch(() => false);
     if (!generateBtnVisible) {

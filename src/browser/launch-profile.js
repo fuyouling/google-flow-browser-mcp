@@ -2,13 +2,12 @@ import { chromium } from 'playwright';
 import path from 'path';
 import fs from 'fs';
 import { logger } from '../utils/logger.js';
-import { get } from '../utils/config.js';
+import { get, getChromePath, getChromeUserDataDir } from '../utils/config.js';
 import { FlowError, ErrorCodes } from '../utils/errors.js';
 import { launchChromeDirect, setPage, setContext, setConnected, setBrowser, isBrowserConnected } from './connect.js';
 
-const CHROME_PATH = '/opt/google/chrome/chrome';
 const CDP_PORT = get('cdpPort', 9222);
-const FLOW_URL = get('flowUrl', 'https://labs.google/fx/fr/tools/flow');
+const FLOW_URL = get('flowUrl', 'https://labs.google/fx/zh/tools/flow');
 
 export async function launchKiaraProfile(headless = false) {
   if (isBrowserConnected()) {
@@ -16,14 +15,15 @@ export async function launchKiaraProfile(headless = false) {
     return { success: true, message: 'Already connected' };
   }
 
-  const profileSource = path.resolve(process.env.HOME, '.config/google-chrome/Profile 3');
+  const chromePath = getChromePath();
+  const userDataDir = getChromeUserDataDir();
 
-  if (!fs.existsSync(profileSource)) {
+  if (!fs.existsSync(userDataDir)) {
     throw new FlowError(ErrorCodes.CONFIG_ERROR,
-      `Profile 3 not found at ${profileSource}. Make sure Chrome Profile 3 exists and is configured with your Google account.`);
+      `Chrome User Data directory not found at ${userDataDir}. Make sure "chromeUserDataDir" is correctly configured.`);
   }
 
-  logger.info('Launching Chrome via direct+CDP method (anti-detection)', { profileSource });
+  logger.info('Launching Chrome via direct+CDP method (anti-detection)', { userDataDir, chromePath });
 
   try {
     // Try connecting to existing Chrome instance first
@@ -41,18 +41,16 @@ export async function launchKiaraProfile(headless = false) {
   } catch {
     // Launch Chrome directly (not via Playwright) for anti-detection
     return await launchChromeDirect({
-      chromePath: CHROME_PATH,
+      chromePath,
       cdpPort: CDP_PORT,
       headless,
-      profileSource,
+      userDataDir,
     });
   }
 }
 
 export async function navigateToFlow(page, toolPage) {
-  const targetUrl = toolPage === true
-    ? 'https://labs.google/fx/fr/tools/flow'
-    : FLOW_URL;
+  const targetUrl = FLOW_URL;
 
   logger.info('Navigating to Google Flow', { url: targetUrl });
   await page.goto(targetUrl, { waitUntil: 'networkidle', timeout: 30000 });

@@ -26,7 +26,7 @@ function timestamp() {
 export const logger = {
   info(msg, data = {}) {
     const line = `[${timestamp()}] INFO  ${msg} ${Object.keys(data).length ? JSON.stringify(data) : ''}`;
-    console.log(line);
+    console.error(line);
     getLogStream().write(line + '\n');
   },
 

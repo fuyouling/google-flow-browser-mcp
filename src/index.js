@@ -24,6 +24,7 @@ import { handleOpenToolsGallery } from './tools/open-tools-gallery.js';
 import { handleUseGridArchitect } from './tools/grid-architect.js';
 import { handleDiscoverUi } from './tools/discover-ui.js';
 import { handleUseFlowTool } from './tools/use-flow-tool.js';
+import { handleListProjects, handleOpenProject } from './tools/manage-projects.js';
 import { jobQueue } from './queue/job-queue.js';
 import { takeScreenshot } from './utils/screenshots.js';
 import fs from 'fs';
@@ -74,13 +75,13 @@ const TOOL_DEFINITIONS = [
   },
   {
     name: 'flow_generate_image',
-    description: '⚠️ CES IMAGES CONSOMMENT DES CRÉDITS. Par défaut (auto_confirm=false): remplit le prompt, sélectionne le modèle/ratio, prend un screenshot et retourne "ready_for_confirmation". NE clique PAS sur Generate. Quand auto_confirm=true: vérifie d\'abord que l\'interface est bien en mode IMAGE (pas Vidéo), que le modèle est un modèle image, prend un screenshot de vérification, PUIS clique Generate, attend les images et les télécharge. NAN/BANANA modèles image seulement.',
+    description: 'Generate AI images in Google Flow using Nano Banana Pro, Nano Banana 2, or Imagen 4. Credit Notice: If auto_confirm=false (default), prepares the prompt, model, and ratio, captures a screenshot, and returns "ready_for_confirmation" WITHOUT consuming credits. When auto_confirm=true, verifies Image mode, clicks Generate, waits for completion, and downloads results.',
     inputSchema: {
       type: 'object',
       properties: {
         prompt: { type: 'string', description: 'The text prompt for image generation.' },
         model: { type: 'string', description: 'Model to use: Nano Banana Pro, Nano Banana 2, or Imagen 4.', default: 'Nano Banana 2' },
-        auto_confirm: { type: 'boolean', description: '⚠️ CRÉDITS. Si false (défaut): prépare seulement, ne consomme rien. Si true: vérifie que le mode Image est actif, PUIS clique Generate (consomme des crédits).', default: false },
+        auto_confirm: { type: 'boolean', description: 'Credit safety flag. If false (default): prepares settings and preview without spending credits. If true: clicks Generate and consumes credits.', default: false },
         ratio: { type: 'string', description: 'Aspect ratio: 1:1, 16:9, 9:16, 4:3, 3:4.', default: '1:1' },
         reference_images: { type: 'array', items: { type: 'string' }, description: 'Paths to reference images (optional).' },
         brand: { type: 'string', description: 'Brand context for automatic model selection: premium, standard.' },
@@ -214,6 +215,28 @@ const TOOL_DEFINITIONS = [
       },
     },
   },
+  {
+    name: 'flow_list_projects',
+    description: 'List all Google Flow projects from both local registry and live homepage, with auto-synchronization.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        refresh: { type: 'boolean', description: 'Whether to scan live homepage for updated projects.', default: true },
+      },
+    },
+  },
+  {
+    name: 'flow_open_project',
+    description: 'Open a specific Google Flow project by name, ID, or URL.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        project_name: { type: 'string', description: 'Name of the project to open (e.g. "the-secret-garden").' },
+        project_id: { type: 'string', description: 'Optional project ID or UUID.' },
+        url: { type: 'string', description: 'Optional direct project URL.' },
+      },
+    },
+  },
 ];
 
 async function handleToolCall(name, args) {
@@ -341,6 +364,16 @@ async function handleToolCall(name, args) {
 
     case 'flow_queue_status': {
       return { content: [{ type: 'text', text: JSON.stringify(jobQueue.getStatus(args?.history_limit), null, 2) }] };
+    }
+
+    case 'flow_list_projects': {
+      const result = await handleListProjects(args);
+      return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+    }
+
+    case 'flow_open_project': {
+      const result = await handleOpenProject(args);
+      return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
     }
 
     default:

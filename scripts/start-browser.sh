@@ -7,7 +7,6 @@ IFS=$'\n\t'
 
 CHROME="/opt/google/chrome/chrome"
 USER_DATA_DIR="$HOME/.config/google-chrome"
-PROFILE="Profile 3"
 CDP_PORT=9222
 
 log()  { echo "[$(date '+%Y-%m-%dT%H:%M:%S')] INFO  $*" >&2; }
@@ -29,16 +28,16 @@ if lsof -i :$CDP_PORT >/dev/null 2>&1; then
   fi
 fi
 
-log "Launching Chrome with profile $PROFILE on CDP port $CDP_PORT"
+log "Launching Chrome on CDP port $CDP_PORT"
 "$CHROME" \
   --user-data-dir="$USER_DATA_DIR" \
-  --profile-directory="$PROFILE" \
   --remote-debugging-port="$CDP_PORT" \
+  --remote-allow-origins="*" \
   --no-first-run \
   --no-default-browser-check \
   --disable-extensions \
   --disable-sync \
-  --disable-features=ChromeWhatsNewUI \
+  --disable-features=ChromeWhatsNewUI,DevToolsRemoteDebuggingAllowNotice \
   --disable-background-networking \
   --disable-component-update \
   --disable-sync-preferences \
